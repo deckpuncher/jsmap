@@ -1,6 +1,9 @@
 window.onload = DoStuff;
 var maxPoints = 21;
 var xIncrement, yIncrement;
+var landTiles = [];
+var landColor = "rgb(117, 80, 53)";
+var playzoneSize = 200;
 
 function DoStuff() {
     var c = document.getElementById("playArea");
@@ -8,7 +11,19 @@ function DoStuff() {
     yIncrement = c.clientHeight / (maxPoints / 1.5);
 
     DrawMap();
+    DrawPlayzone();
 };
+
+function DrawPlayzone() {
+    var c = document.getElementById("playArea");
+    var ctx = c.getContext("2d");
+
+    var centroid = landTiles[Math.floor(Math.random() * landTiles.length)];
+    ctx.beginPath();
+    ctx.arc(centroid[0], centroid[1], playzoneSize, 0, 2 * Math.PI);
+    ctx.strokeStyle = "black";
+    ctx.stroke();
+}
 
 function DrawMap() {
     var c = document.getElementById("playArea");
@@ -31,12 +46,30 @@ function DrawMap() {
     var cPoints = GetControlPoints(currentPos, endPos);
     ctx.bezierCurveTo(cPoints.cp1x, cPoints.cp1y, cPoints.cp2x, cPoints.cp2y, endPos.x, endPos.y);
 
-    ctx.fillStyle = "brown";
-    ctx.strokeStyle = "brown";
+    ctx.fillStyle = landColor;
+    ctx.strokeStyle = landColor;
     ctx.fill();
     ctx.stroke();
+
+    CalculateLandTiles();
+
 };
 
+function CalculateLandTiles() {
+    var c = document.getElementById("playArea");
+    var ctx = c.getContext("2d");
+    var x, y = 0;
+
+    var data = ctx.getImageData(0, 0, c.clientWidth, c.clientHeight).data;
+    for (i = 0; i < data.length; i += 4) {
+        var x = (i / 4) % c.clientWidth;
+        var y = Math.floor((i / 4) / c.clientWidth);
+
+        if (data[i] === 117 && data[i + 1] === 80 && data[i + 2] === 53) {
+            landTiles.push([x, y]);
+        }
+    }
+}
 function GetNextPosition(currentPos, index, increments) {
     var x, y;
     if (index < maxPoints / 2) {
