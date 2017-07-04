@@ -30,6 +30,10 @@ function DrawMap() {
     endPos = { x: 400, y: 25 };
     var cPoints = GetControlPoints(currentPos, endPos);
     ctx.bezierCurveTo(cPoints.cp1x, cPoints.cp1y, cPoints.cp2x, cPoints.cp2y, endPos.x, endPos.y);
+
+    ctx.fillStyle = "brown";
+    ctx.strokeStyle = "brown";
+    ctx.fill();
     ctx.stroke();
 };
 
