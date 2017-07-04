@@ -1,11 +1,11 @@
 window.onload = DoStuff;
-var maxPoints = 20;
+var maxPoints = 21;
 var xIncrement, yIncrement;
 
 function DoStuff() {
     var c = document.getElementById("playArea");
-    xIncrement = 20;
-    yIncrement = 20;
+    xIncrement = c.clientWidth / (maxPoints / 1.5);
+    yIncrement = c.clientHeight / (maxPoints / 1.5);
 
     DrawMap();
 };
@@ -14,26 +14,26 @@ function DrawMap() {
     var c = document.getElementById("playArea");
     var ctx = c.getContext("2d");
 
-    var currentPos = { x: 200, y: 25 };
+    var currentPos = { x: 400, y: 25 };
 
     ctx.beginPath();
     ctx.moveTo(currentPos.x, currentPos.y);
     for (i = 0; i < maxPoints; i++) {
         var endPos = GetNextPosition(currentPos, i);
         console.log(endPos);
-        var cPoints = GetControlPoints(currentPos, endPos);
+        var cPoints = GetControlPoints(currentPos, i);
         console.log(cPoints);
         ctx.bezierCurveTo(cPoints.cp1x, cPoints.cp1y, cPoints.cp2x, cPoints.cp2y, endPos.x, endPos.y);
 
         currentPos = endPos;
     }
     endPos = { x: 400, y: 25 };
-    // var cPoints = GetControlPoints(currentPos, endPos);
-    // ctx.bezierCurveTo(cPoints.cp1x, cPoints.cp1y, cPoints.cp2x, cPoints.cp2y, endPos.x, endPos.y);
+    var cPoints = GetControlPoints(currentPos, endPos);
+    ctx.bezierCurveTo(cPoints.cp1x, cPoints.cp1y, cPoints.cp2x, cPoints.cp2y, endPos.x, endPos.y);
     ctx.stroke();
 };
 
-function GetNextPosition(currentPos, index) {
+function GetNextPosition(currentPos, index, increments) {
     var x, y;
     if (index < maxPoints / 2) {
         if (index < maxPoints / 4) {
@@ -53,25 +53,39 @@ function GetNextPosition(currentPos, index) {
     }
 
     return { x: x, y: y };
-
 };
 
-function GetControlPoints(currentPos, endPos) {
-    var cp1x = GetIncrement(currentPos.x);
-    var cp1y = GetIncrement(currentPos.y);
+function GetControlPoints(currentPos, index) {
+    var cp1 = GetIncrement(currentPos, index);
+    var cp2 = GetIncrement(cp1, index);
 
-    var cp2x = GetIncrement(cp1x);
-    var cp2y = GetIncrement(cp1y);
-
-    // var cp1x = Math.min(endPos.x, currentPos.x * Math.random());
-    // var cp1y = Math.min(endPos.y, currentPos.y * Math.random());
-
-    // var cp2x = Math.max(endPos.x, currentPos.x * Math.random());
-    // var cp2y = Math.max(endPos.y, currentPos.y * Math.random());
-
-    return { cp1x: cp1x, cp1y: cp1y, cp2x: cp2x, cp2y: cp2y };
+    return { cp1x: cp1.x, cp1y: cp1.y, cp2x: cp2.x, cp2y: cp2.y };
 };
 
-function GetIncrement(startingpoint) {
-    return startingpoint + startingpoint * Math.random() / 10;
+function GetIncrement(position, index) {
+    var x, y;
+
+    if (index < maxPoints / 2) {
+        if (index < maxPoints / 4) {
+            x = position.x - GetSalty(position.x);
+        } else {
+            x = position.x + GetSalty(position.x);
+        }
+        y = position.y + GetSalty(position.y);
+    }
+    else {
+        if (index >= (maxPoints / 4) * 3) {
+            x = position.x - GetSalty(position.x);
+        } else {
+            x = position.x + GetSalty(position.x);
+        }
+        y = position.y - GetSalty(position.y);
+    }
+
+    return { x: x, y: y };
+}
+
+function GetSalty(position) {
+    var salt = Math.random() > 0.5 ? -1 : 1;
+    return position * (Math.random() % 0.3) * salt;
 }
